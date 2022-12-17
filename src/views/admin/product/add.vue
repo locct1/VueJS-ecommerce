@@ -1,0 +1,66 @@
+<template>
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          
+            <h6 class="m-0 font-weight-bold text-primary">Quản lý sản phẩm</h6>
+        </div>
+        <div class="card-body">
+            <ProductForm :selected="selected" :brands="brands" :product="product" @submit:product="addProduct" @delete:product="deleteProduct" />
+            <p>{{ message }}</p>
+        </div>
+    </div>
+</template>
+<script>
+import ProductForm from "@/components/admin/product/ProductForm.vue";
+import ProductService from "@/services/product.service";
+import BrandService from "@/services/brand.service";
+export default {
+    components: { ProductForm },
+    props: { id: { type: String, required: true } },
+    data() {
+        return {
+            product: {
+                name: "",
+                image: "",
+                price:"",
+                description:""
+            },
+
+            message: "",
+            brands:[],
+            selected:''
+        };
+    },
+    methods: {
+        async addProduct(data) {
+            const formData = new FormData();
+            formData.append("image", data.product.image);
+            formData.append("name", data.product.name);
+            formData.append("price", data.product.price);
+            formData.append("description", data.product.description);
+            formData.append("brand_code", data.selected);
+            try {
+                await ProductService.create(formData);
+                this.message = "Sản phẩm được thêm thành công.";
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        async getListBrands(){
+            try {
+                this.brands = await BrandService.getAll();
+              
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    },
+    created() {
+        // this.getProduct(this.id);
+        this.message = "";
+    },
+    mounted(){
+        this.getListBrands();
+    }
+};
+</script>
